@@ -12,9 +12,7 @@
 #define F_CPU 8000000UL
 #include "DC Motor Driver/dc_motor.h"
 #include "External EEPROM/external_eeprom.h"
-#include "Timer 0/timer0.h"
 #include "Timer 1/timer1.h"
-#include "Timer 2/timer2.h"
 #include "UART/uart.h"
 
 /* Random number to check if the control ECU is ready to receive
@@ -50,6 +48,7 @@ void setPassword(uint8 *password,uint8 *password_2);
 int main(void){
 	volatile uint8 password[7];
 	volatile uint8 password_2[7];
+	uint8 i;
 	uint8 state;
 	Timer1_ConfigType period;
 	Dcmotor_ConfigType motor;
@@ -193,7 +192,7 @@ void changePassword(uint8 *password,uint8 *password_2){
 				void
 ------------------------------------------------------------------------------*/
 void openDoor(uint8 *password,uint8 *password_2){
-	uint8 n=0,i;
+	uint8 n=0;
 	receivePassword(password);
 	readPasswordFromEeprom(password_2);
 	g_matchingCheck=matchingCheck(password,password_2);
@@ -282,7 +281,7 @@ void periodCallBack(void){
 void readPasswordFromEeprom(uint8 *password){
 	uint8 i;
 	for(i=0;i<6;i++){
-		EEPROM_readByte((0x0311+8*i),password);
+		EEPROM_readByte((0x0311+i),password[i]);
 	}
 }
 
@@ -301,7 +300,7 @@ void readPasswordFromEeprom(uint8 *password){
 void writePasswordToEeprom(uint8 *password){
 	uint8 i;
 	for(i=0;i<6;i++){
-		EEPROM_writeByte((0x0311+8*i),password[i]);
+		EEPROM_writeByte((0x0311+i),password[i]);
 	}
 }
 
