@@ -46,8 +46,8 @@ void changePassword(uint8 *password,uint8 *password_2);
 void setPassword(uint8 *password,uint8 *password_2);
 
 int main(void){
-	volatile uint8 password[7];
-	volatile uint8 password_2[7];
+	volatile uint8 password[15];
+	volatile uint8 password_2[15];
 	uint8 i;
 	uint8 state;
 	Timer1_ConfigType period;
@@ -126,8 +126,8 @@ void setPassword(uint8 *password,uint8 *password_2){
 		g_matchingCheck=matchingCheck(password,password_2);
 	}
 	/*Once they are matched save the password into the EEPROM*/
-		UART_sendByte(MATCHED);
-		writePasswordToEeprom(password);
+	UART_sendByte(MATCHED);
+	writePasswordToEeprom(password);
 }
 
 /* ---------------------------------------------------------------------------
@@ -279,8 +279,10 @@ void periodCallBack(void){
 				void
 ------------------------------------------------------------------------------*/
 void readPasswordFromEeprom(uint8 *password){
-	uint8 i;
-	for(i=0;i<6;i++){
+	uint8 i=0;
+	EEPROM_readByte((0x0311+i),password[i]);
+	while(password[i]!=13){
+		i++;
 		EEPROM_readByte((0x0311+i),password[i]);
 	}
 }
@@ -298,8 +300,10 @@ void readPasswordFromEeprom(uint8 *password){
 				void
 ------------------------------------------------------------------------------*/
 void writePasswordToEeprom(uint8 *password){
-	uint8 i;
-	for(i=0;i<6;i++){
+	uint8 i=0;
+	EEPROM_writeByte((0x0311+i),password[i]);
+	while(password[i]!=13){
+		i++;
 		EEPROM_writeByte((0x0311+i),password[i]);
 	}
 }
@@ -315,8 +319,10 @@ void writePasswordToEeprom(uint8 *password){
 				void
 ------------------------------------------------------------------------------*/
 void receivePassword(uint8 *password){
-	uint8 i;
-	for(i=0;i<6;i++){
+	uint8 i=0;
+	password[i]=UART_receiveByte();
+	while (password[i]!=13){
+		i++;
 		password[i]=UART_receiveByte();
 	}
 }
@@ -335,13 +341,14 @@ void receivePassword(uint8 *password){
 				out -> MATCHED OR UNMATCHED
 ------------------------------------------------------------------------------*/
 uint8 matchingCheck(uint8 * password , uint8 * password_2){
-	uint8 i,j=0;
-	for (i=0;i<6;i++){
+	uint8 i=0,j=0;
+	while(password[i]!=13){
 		if(password[i]==password_2[i]){
 			j++;
 		}
+		i++;
 	}
-	if(j==6)
+	if(j==i)
 		return MATCHED;
 	else
 		return UNMATCHED;

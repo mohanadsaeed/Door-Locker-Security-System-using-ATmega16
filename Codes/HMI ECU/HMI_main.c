@@ -35,7 +35,7 @@ void openDoor(uint8 *password);
 void changePassword(uint8 *password);
 
 int main(void){
-	volatile uint8 password[7];
+	volatile uint8 password[15];
 	uint8 key;
 	Uart_ConfigType uart;
 	/*Setting the UART Configuration*/
@@ -219,6 +219,7 @@ void sendPassword(uint8 *password){
 		UART_sendByte(password[i]);
 		i++;
 	}
+	UART_sendByte(password[i]);
 }
 
 /* ---------------------------------------------------------------------------
